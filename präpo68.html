@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russische Präpositionen: Logik-Trainer</title>
+    <script src="https://cdn.jsdelivr.net/npm/drag-drop-touch@1.3.1/DragDropTouch.js"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #3498db;
+            --success: #27ae60;
+            --error: #e74c3c;
+            --bg: #f4f7f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--primary);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        h1 { text-align: center; color: var(--primary); margin-bottom: 20px; font-size: 1.5rem; }
+
+        .explanation {
+            background: #eef2f7;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 5px solid var(--accent);
+            font-size: 0.95rem;
+        }
+
+        /* Spalten für die Kategorien */
+        .zones {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .zone {
+            background: #f9f9f9;
+            border: 2px dashed #ccc;
+            border-radius: 12px;
+            padding: 15px;
+            min-height: 220px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .zone:hover { border-color: var(--accent); background: #f0f7ff; }
+        .zone h3 { margin-top: 0; color: var(--accent); font-size: 1.1rem; }
+        .zone p { font-size: 0.8rem; color: #777; margin-bottom: 15px; font-style: italic; }
+
+        /* Kärtchen-Bereich */
+        .card-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            padding: 20px;
+            background: #eee;
+            border-radius: 10px;
+            min-height: 80px;
+        }
+
+        .card {
+            background: white;
+            border: 2px solid var(--primary);
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            user-select: none;
+            transition: all 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .card.selected { background: var(--accent); color: white; border-color: var(--primary); }
+        
+        /* Feedback */
+        .card.correct { background: var(--success) !important; color: white; border-color: #1e8449; cursor: default; }
+        .card.incorrect { background: var(--error) !important; color: white; border-color: #922b21; }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+
+        .btn-reset { background: #95a5a6; color: white; }
+        .btn-solution { background: var(--accent); color: white; }
+        button:hover { opacity: 0.9; }
+
+        .zone-content {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+
+        @media (max-width: 700px) {
+            .zones { grid-template-columns: 1fr; }
+            .zone { min-height: 120px; }
+            h1 { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Logik-Check: Präpositionen</h1>
+    
+    <div class="explanation">
+        <strong>Anleitung:</strong> In welches russische Präpositions-System gehören diese deutschen Ausdrücke? 
+        <br>1. Klicke ein <strong>deutsches Kärtchen</strong> an.
+        <br>2. Klicke dann auf die <strong>richtige Box</strong> oben.
+    </div>
+
+    <div class="zones">
+        <div class="zone" id="zone-VI" onclick="placeCard('VI')">
+            <h3>В / ИЗ</h3>
+            <p>(Gebäude, geschlossene Räume, Städte)</p>
+            <div class="zone-content" id="content-VI"></div>
+        </div>
+        <div class="zone" id="zone-NS" onclick="placeCard('NS')">
+            <h3>НА / С</h3>
+            <p>(Plätze, Events, Aktivitäten)</p>
+            <div class="zone-content" id="content-NS"></div>
+        </div>
+        <div class="zone" id="zone-KO" onclick="placeCard('KO')">
+            <h3>К / ОТ</h3>
+            <p>(Personen)</p>
+            <div class="zone-content" id="content-KO"></div>
+        </div>
+    </div>
+
+    <div class="card-pool" id="pool">
+        <!-- Karten werden hier generiert -->
+    </div>
+
+    <div class="controls">
+        <button class="btn-reset" onclick="initGame()">Neu mischen</button>
+        <button class="btn-solution" onclick="showSolution()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    const cardData = [
+        { text: "in die Schule", cat: "VI" },
+        { text: "aus der Schule", cat: "VI" },
+        { text: "ins Geschäft", cat: "VI" },
+        { text: "aus dem Laden", cat: "VI" },
+        { text: "auf die Arbeit", cat: "NS" },
+        { text: "von der Arbeit", cat: "NS" },
+        { text: "zur Post", cat: "NS" },
+        { text: "von der Post", cat: "NS" },
+        { text: "zum Arzt", cat: "KO" },
+        { text: "vom Arzt", cat: "KO" },
+        { text: "zum Freund", cat: "KO" },
+        { text: "von der Oma", cat: "KO" }
+    ];
+
+    let selectedCard = null;
+
+    function initGame() {
+        const pool = document.getElementById('pool');
+        pool.innerHTML = '';
+        document.querySelectorAll('.zone-content').forEach(z => z.innerHTML = '');
+        selectedCard = null;
+
+        // Karten mischen
+        const shuffled = [...cardData].sort(() => Math.random() - 0.5);
+
+        shuffled.forEach((data, index) => {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerText = data.text;
+            div.onclick = (e) => {
+                e.stopPropagation();
+                selectCard(div, data);
+            };
+            pool.appendChild(div);
+        });
+    }
+
+    function selectCard(element, data) {
+        if (element.classList.contains('correct')) return;
+        
+        // Vorherige Auswahl im Pool/Zonen entfernen
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('selected', 'incorrect'));
+        
+        selectedCard = { element, data };
+        element.classList.add('selected');
+    }
+
+    function placeCard(zoneId) {
+        if (!selectedCard) return;
+
+        const zoneContent = document.getElementById('content-' + zoneId);
+        
+        // Überprüfung der Kategorie
+        if (selectedCard.data.cat === zoneId) {
+            selectedCard.element.classList.add('correct');
+            selectedCard.element.classList.remove('selected', 'incorrect');
+            zoneContent.appendChild(selectedCard.element);
+            selectedCard = null;
+        } else {
+            selectedCard.element.classList.add('incorrect');
+            // Kurzer Shake-Effekt oder Reset des Status nach Fehler
+            setTimeout(() => {
+                if(selectedCard) selectedCard.element.classList.remove('incorrect');
+            }, 600);
+        }
+    }
+
+    function showSolution() {
+        // Erst alles zurücksetzen
+        initGame(); 
+        
+        cardData.forEach(data => {
+            const zoneContent = document.getElementById('content-' + data.cat);
+            const cardElements = document.querySelectorAll('#pool .card');
+            
+            for (let el of cardElements) {
+                if (el.innerText === data.text) {
+                    el.classList.add('correct');
+                    zoneContent.appendChild(el);
+                    break;
+                }
+            }
+        });
+        selectedCard = null;
+    }
+
+    // Spielstart initialisieren
+    window.onload = initGame;
+</script>
+
+</body>
+</html>
