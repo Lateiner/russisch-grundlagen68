@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fehlersuche: Russische Präpositionen</title>
+    <!-- Polyfill für Touch-Geräte -->
+    <script src="https://cdn.jsdelivr.net/npm/drag-drop-touch@1.3.1/DragDropTouch.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #e74c3c;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.6rem;
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .instruction {
+            background: #eef2f7;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 5px solid var(--accent-color);
+            font-size: 0.95rem;
+        }
+
+        .exercise-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: box-shadow 0.3s;
+        }
+
+        .exercise-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .translation {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+
+        .sentence-display {
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .word {
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: default;
+        }
+
+        .error-word {
+            background-color: #fff3cd;
+            border-bottom: 2px dashed #856404;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .error-word:hover {
+            background-color: #ffeeba;
+        }
+
+        .correction-zone {
+            display: none; /* Erst nach Klick auf Fehler sichtbar */
+            margin-top: 10px;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        select {
+            padding: 8px;
+            font-size: 1.1rem;
+            border-radius: 5px;
+            border: 2px solid #ccc;
+            outline: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Feedback Styles */
+        .correct-field {
+            background-color: var(--success-color) !important;
+            color: white !important;
+            border-color: #1e8449 !important;
+        }
+
+        .incorrect-field {
+            background-color: var(--error-color) !important;
+            color: white !important;
+            border-color: #922b21 !important;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        .btn-reset { background: #95a5a6; color: white; }
+        .btn-solution { background: var(--accent-color); color: white; }
+        button:hover { opacity: 0.9; }
+
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            .sentence-display { font-size: 1.1rem; }
+            h1 { font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Fehlersuche: Russische Präpositionen</h1>
+    
+    <div class="instruction">
+        <strong>Anleitung:</strong> In jedem Satz ist eine <strong>Präposition falsch</strong>. 
+        <ol>
+            <li>Klicke auf die falsche Präposition im Satz.</li>
+            <li>Wähle aus der Liste die richtige Präposition aus.</li>
+        </ol>
+        Das Feld gibt sofort Feedback: <strong>Grün</strong> für richtig, <strong>Rot</strong> für falsch.
+    </div>
+
+    <div id="exercise-list">
+        <!-- JS generiert Aufgaben hier -->
+    </div>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <button class="btn-reset" style="padding: 15px 30px;" onclick="resetAll()">Alle zurücksetzen</button>
+    </div>
+</div>
+
+<script>
+    const errorData = [
+        { id: 1, sentence: ["Я", "иду", "из", "работу"], errorIdx: 2, options: ["в", "на", "с", "из"], correct: "с", trans: "Ich komme von der Arbeit." },
+        { id: 2, sentence: ["Он", "идёт", "с", "магазина"], errorIdx: 2, options: ["из", "с", "от", "к"], correct: "из", trans: "Er kommt aus dem Geschäft." },
+        { id: 3, sentence: ["Мы", "идём", "в", "концерт"], errorIdx: 2, options: ["в", "на", "к", "у"], correct: "на", trans: "Wir gehen auf das Konzert." },
+        { id: 4, sentence: ["Она", "вышла", "от", "театра"], errorIdx: 2, options: ["из", "с", "от", "у"], correct: "из", trans: "Sie ist aus dem Theater gekommen." },
+        { id: 5, sentence: ["Мама", "идёт", "с", "аптеки"], errorIdx: 2, options: ["с", "из", "от", "в"], correct: "из", trans: "Mama kommt aus der Apotheke." },
+        { id: 6, sentence: ["Я", "еду", "из", "врача"], errorIdx: 2, options: ["из", "с", "от", "к"], correct: "от", trans: "Ich komme vom Arzt." },
+        { id: 7, sentence: ["Он", "идёт", "в", "друга"], errorIdx: 2, options: ["в", "на", "к", "у"], correct: "к", trans: "Er geht zum Freund." },
+        { id: 8, sentence: ["Книга", "пришла", "с", "университета"], errorIdx: 2, options: ["с", "из", "от", "в"], correct: "из", trans: "Das Buch kam aus der Universität." },
+        { id: 9, sentence: ["Мы", "идём", "на", "школу"], errorIdx: 2, options: ["в", "на", "к", "у"], correct: "в", trans: "Wir gehen in die Schule." },
+        { id: 10, sentence: ["Самолёт", "летит", "с", "Москвы"], errorIdx: 2, options: ["с", "из", "от", "в"], correct: "из", trans: "Das Flugzeug fliegt aus Moskau." },
+        { id: 11, sentence: ["Она", "пришла", "из", "стадиона"], errorIdx: 2, options: ["из", "с", "со", "от"], correct: "со", trans: "Sie kam vom Stadion." },
+        { id: 12, sentence: ["Я", "иду", "к", "парк"], errorIdx: 2, options: ["к", "в", "на", "у"], correct: "в", trans: "Ich gehe in den Park." },
+        { id: 13, sentence: ["Студент", "идёт", "в", "лекцию"], errorIdx: 2, options: ["в", "на", "к", "у"], correct: "на", trans: "Der Student geht zur Vorlesung." },
+        { id: 14, sentence: ["Мы", "едем", "на", "бабушку"], errorIdx: 2, options: ["на", "в", "к", "у"], correct: "к", trans: "Wir fahren zur Oma." },
+        { id: 15, sentence: ["Письмо", "с", "мамы"], errorIdx: 1, options: ["с", "из", "от", "у"], correct: "от", trans: "Ein Brief von Mama." },
+        { id: 16, sentence: ["Я", "сижу", "на", "библиотеке"], errorIdx: 2, options: ["на", "в", "у", "к"], correct: "в", trans: "Ich sitze in der Bibliothek." }
+    ];
+
+    const exerciseList = document.getElementById('exercise-list');
+
+    function init() {
+        exerciseList.innerHTML = '';
+        errorData.forEach(data => {
+            const card = document.createElement('div');
+            card.className = 'exercise-card';
+            card.id = `card-${data.id}`;
+
+            // Wort-Spans erstellen
+            const sentenceHtml = data.sentence.map((word, idx) => {
+                if (idx === data.errorIdx) {
+                    return `<span class="word error-word" id="error-${data.id}" onclick="showCorrection(${data.id})">${word}</span>`;
+                }
+                return `<span class="word">${word}</span>`;
+            }).join('');
+
+            card.innerHTML = `
+                <div class="translation">🇩🇪 „${data.trans}“</div>
+                <div class="sentence-display">
+                    ${sentenceHtml}
+                </div>
+                <div class="correction-zone" id="zone-${data.id}">
+                    <label>Korrektur: </label>
+                    <select id="select-${data.id}" onchange="checkAnswer(${data.id})">
+                        <option value="">-- ? --</option>
+                        ${data.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="controls">
+                    <button class="btn-solution" onclick="showSolution(${data.id})">Lösung anzeigen</button>
+                    <button class="btn-reset" onclick="resetOne(${data.id})">Zurücksetzen</button>
+                </div>
+            `;
+            exerciseList.appendChild(card);
+        });
+    }
+
+    window.showCorrection = function(id) {
+        document.getElementById(`zone-${id}`).style.display = 'block';
+    };
+
+    window.checkAnswer = function(id) {
+        const select = document.getElementById(`select-${id}`);
+        const data = errorData.find(d => d.id === id);
+        const errorSpan = document.getElementById(`error-${id}`);
+
+        if (select.value === "") {
+            select.className = "";
+            return;
+        }
+
+        if (select.value === data.correct) {
+            select.className = "correct-field";
+            errorSpan.innerText = select.value;
+            errorSpan.style.backgroundColor = "#d4edda";
+            errorSpan.style.borderColor = "#c3e6cb";
+            errorSpan.style.borderStyle = "solid";
+        } else {
+            select.className = "incorrect-field";
+        }
+    };
+
+    window.showSolution = function(id) {
+        const data = errorData.find(d => d.id === id);
+        const select = document.getElementById(`select-${id}`);
+        const errorSpan = document.getElementById(`error-${id}`);
+        const zone = document.getElementById(`zone-${id}`);
+
+        zone.style.display = 'block';
+        select.value = data.correct;
+        select.className = "correct-field";
+        
+        errorSpan.innerText = data.correct;
+        errorSpan.style.backgroundColor = "#d4edda";
+        errorSpan.style.borderStyle = "solid";
+    };
+
+    window.resetOne = function(id) {
+        const data = errorData.find(d => d.id === id);
+        const select = document.getElementById(`select-${id}`);
+        const errorSpan = document.getElementById(`error-${id}`);
+        const zone = document.getElementById(`zone-${id}`);
+
+        zone.style.display = 'none';
+        select.value = "";
+        select.className = "";
+        
+        errorSpan.innerText = data.sentence[data.errorIdx];
+        errorSpan.style.backgroundColor = "#fff3cd";
+        errorSpan.style.borderStyle = "dashed";
+        errorSpan.style.borderColor = "#856404";
+    };
+
+    window.resetAll = function() {
+        init();
+    };
+
+    // Start
+    init();
+</script>
+
+</body>
+</html>
