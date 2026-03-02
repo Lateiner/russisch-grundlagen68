@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logik-Vervollständigung: Russische Präpositionen</title>
+    <!-- Polyfill für Touch-Geräte -->
+    <script src="https://cdn.jsdelivr.net/npm/drag-drop-touch@1.3.1/DragDropTouch.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #e74c3c;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.6rem;
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .instruction {
+            background: #eef2f7;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 5px solid var(--accent-color);
+            font-size: 0.95rem;
+        }
+
+        .analogy-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .analogy-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            background: #fff;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            gap: 15px;
+        }
+
+        .analogy-text {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .analogy-text span {
+            color: var(--accent-color);
+        }
+
+        .options-container {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .option-btn {
+            padding: 8px 15px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .option-btn:hover {
+            border-color: var(--accent-color);
+        }
+
+        /* Status-Farben */
+        .option-btn.correct {
+            background-color: var(--success-color) !important;
+            color: white !important;
+            border-color: var(--success-color) !important;
+        }
+
+        .option-btn.incorrect {
+            background-color: var(--error-color) !important;
+            color: white !important;
+            border-color: var(--error-color) !important;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        button.main-ctrl {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: opacity 0.2s;
+        }
+
+        .btn-reset { background: #95a5a6; color: white; }
+        .btn-solution { background: var(--accent-color); color: white; }
+        button:hover { opacity: 0.9; }
+
+        @media (max-width: 600px) {
+            .analogy-row { grid-template-columns: 1fr; text-align: center; }
+            .options-container { justify-content: center; }
+            h1 { font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Logik-Vervollständigung (Analogien)</h1>
+    
+    <div class="instruction">
+        <strong>Anleitung:</strong> Vervollständige das Schema. Wenn der Hinweg links steht, welche Präposition gehört zum Rückweg rechts? <br>
+        Klicke auf die richtige Präposition (<strong>ИЗ</strong>, <strong>С</strong> oder <strong>ОТ</strong>). <br>
+        Das Feld färbt sich sofort <strong>grün</strong> (richtig) oder <strong>rot</strong> (falsch).
+    </div>
+
+    <div id="analogy-list" class="analogy-grid">
+        <!-- JS generiert hier 16 Analogien -->
+    </div>
+
+    <div class="controls">
+        <button class="main-ctrl btn-reset" onclick="resetAll()">Alle zurücksetzen</button>
+        <button class="main-ctrl btn-solution" onclick="showAllSolutions()">Lösungen anzeigen</button>
+    </div>
+</div>
+
+<script>
+    const analogyData = [
+        { id: 1, word: "Магазин", hin: "В", her: "ИЗ" },
+        { id: 2, word: "Почта", hin: "НА", her: "С" },
+        { id: 3, word: "Врач", hin: "К", her: "ОТ" },
+        { id: 4, word: "Школа", hin: "В", her: "ИЗ" },
+        { id: 5, word: "Работа", hin: "НА", her: "С" },
+        { id: 6, word: "Брат", hin: "К", her: "ОТ" },
+        { id: 7, word: "Театр", hin: "В", her: "ИЗ" },
+        { id: 8, word: "Рынок", hin: "НА", her: "С" },
+        { id: 9, word: "Сестра", hin: "К", her: "ОТ" },
+        { id: 10, word: "Парк", hin: "В", her: "ИЗ" },
+        { id: 11, word: "Стадион", hin: "НА", her: "С" },
+        { id: 12, word: "Бабушка", hin: "К", her: "ОТ" },
+        { id: 13, word: "Банк", hin: "В", her: "ИЗ" },
+        { id: 14, word: "Урок", hin: "НА", her: "С" },
+        { id: 15, word: "Друг", hin: "К", her: "ОТ" },
+        { id: 16, word: "Аптека", hin: "В", her: "ИЗ" }
+    ];
+
+    const container = document.getElementById('analogy-list');
+    const herOptions = ["ИЗ", "С", "ОТ"];
+
+    function init() {
+        container.innerHTML = '';
+        analogyData.forEach(item => {
+            const row = document.createElement('div');
+            row.className = 'analogy-row';
+            row.id = `row-${item.id}`;
+
+            row.innerHTML = `
+                <div class="analogy-text">
+                    ${item.word} : <span>${item.hin}</span> &rarr; ?
+                </div>
+                <div class="options-container">
+                    ${herOptions.map(opt => `
+                        <button class="option-btn" 
+                                id="btn-${item.id}-${opt}" 
+                                onclick="checkOption(${item.id}, '${opt}', '${item.her}')">
+                            ${opt}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+            container.appendChild(row);
+        });
+    }
+
+    window.checkOption = function(rowId, selected, correct) {
+        // Zuerst alle Buttons in dieser Reihe zurücksetzen
+        herOptions.forEach(opt => {
+            const btn = document.getElementById(`btn-${rowId}-${opt}`);
+            btn.className = 'option-btn';
+        });
+
+        // Dann den ausgewählten Button markieren
+        const selectedBtn = document.getElementById(`btn-${rowId}-${selected}`);
+        if (selected === correct) {
+            selectedBtn.classList.add('correct');
+        } else {
+            selectedBtn.classList.add('incorrect');
+        }
+    };
+
+    window.resetAll = function() {
+        init();
+    };
+
+    window.showAllSolutions = function() {
+        analogyData.forEach(item => {
+            herOptions.forEach(opt => {
+                const btn = document.getElementById(`btn-${item.id}-${opt}`);
+                btn.className = 'option-btn'; // Reset
+                if (opt === item.her) {
+                    btn.classList.add('correct');
+                }
+            });
+        });
+    };
+
+    // Start
+    init();
+</script>
+
+</body>
+</html>
