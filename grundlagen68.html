@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interaktive Übungen: Russische Präpositionen</title>
+    <script src="https://cdn.jsdelivr.net/npm/drag-drop-touch@1.3.1/DragDropTouch.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        h1, h2 {
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        .intro {
+            background: #eef2f7;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 40px;
+            border-left: 6px solid var(--secondary-color);
+        }
+
+        .logic-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .logic-table th, .logic-table td {
+            border: 1px solid #dee2e6;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .logic-table th {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .exercise-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            background: #fff;
+        }
+
+        .exercise-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        select, .drop-zone {
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 2px solid #ccc;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .correct {
+            background-color: var(--success-color) !important;
+            color: white !important;
+            border-color: #27ae60 !important;
+        }
+
+        .incorrect {
+            background-color: var(--error-color) !important;
+            color: white !important;
+            border-color: #c0392b !important;
+        }
+
+        .btn-group {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .btn-reset { background: #95a5a6; color: white; }
+        .btn-solution { background: var(--secondary-color); color: white; }
+        button:hover { opacity: 0.9; }
+
+        .drag-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .draggable {
+            background: #ecf0f1;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: grab;
+            border: 1px solid #bdc3c7;
+        }
+
+        .drop-zone {
+            display: inline-block;
+            min-width: 100px;
+            height: 30px;
+            vertical-align: middle;
+            background: #f9f9f9;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .radio-option {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            .btn-group { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Russische Grammatik</h1>
+    <h2>Präpositionen В, НА, К, ИЗ, С, ОТ</h2>
+
+    <div class="intro">
+        <p>Im Russischen bilden Präpositionen oft Paare für die Richtung „hin“ und „zurück“:</p>
+        <table class="logic-table">
+            <tr>
+                <th>Wohin? (Ziel)</th>
+                <th>Woher? (Herkunft)</th>
+                <th>Beispiel</th>
+            </tr>
+            <tr>
+                <td>В (Akkusativ)</td>
+                <td>ИЗ (Genitiv)</td>
+                <td>в школу &harr; из школы</td>
+            </tr>
+            <tr>
+                <td>НА (Akkusativ)</td>
+                <td>С / СО (Genitiv)</td>
+                <td>на работу &harr; с работы</td>
+            </tr>
+            <tr>
+                <td>К (Dativ)</td>
+                <td>ОТ (Genitiv)</td>
+                <td>к врачу &harr; от врача</td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="exercise-container"></div>
+</div>
+
+<script>
+const exercises = [
+    { id: 1, type: 'select', q: "Я иду ___ школу (in die Schule).", options: ['в', 'на', 'к'], a: 'в' },
+    { id: 2, type: 'select', q: "Она идёт ___ работы (von der Arbeit).", options: ['из', 'с', 'от'], a: 'с' },
+    { id: 3, type: 'select', q: "Мы едем ___ врачу (zum Arzt).", options: ['в', 'на', 'к'], a: 'к' },
+    { id: 4, type: 'select', q: "Антон пришёл ___ магазина (aus dem Geschäft).", options: ['из', 'с', 'от'], a: 'из' },
+    { id: 5, type: 'select', q: "Я иду ___ брату (zum Bruder).", options: ['в', 'на', 'к'], a: 'к' },
+    { id: 6, type: 'select', q: "Книга пришла ___ почты (von der Post).", options: ['из', 'с', 'от'], a: 'с' },
+    { id: 7, type: 'select', q: "Они едут ___ Украину (in die Ukraine).", options: ['в', 'на', 'к'], a: 'на' },
+    { id: 8, type: 'select', q: "Я иду ___ библиотеки (aus der Bibliothek).", options: ['из', 'с', 'от'], a: 'из' },
+    { id: 9, type: 'select', q: "Мы идём ___ концерт (auf das Konzert).", options: ['в', 'на', 'к'], a: 'на' },
+    { id: 10, type: 'select', q: "Он вернулся ___ друга (vom Freund).", options: ['из', 'с', 'от'], a: 'от' },
+    { id: 11, type: 'radio', q: "Welche Präposition passt zu „стадион“ (Wohin)?", options: ['в', 'на'], a: 'на' },
+    { id: 12, type: 'radio', q: "Welche Präposition passt zu „университет“ (Wohin)?", options: ['в', 'на'], a: 'в' },
+    { id: 13, type: 'select', q: "Я еду ___ родителям (zu den Eltern).", options: ['в', 'на', 'к'], a: 'к' },
+    { id: 14, type: 'select', q: "Письмо ___ мамы (von der Mama).", options: ['из', 'с', 'от'], a: 'от' },
+    { id: 15, type: 'select', q: "Мы идём ___ парк (in den Park).", options: ['в', 'на', 'к'], a: 'в' },
+    { id: 16, type: 'drag', q: "Ordne das Paar zu: В школу &harr; ___ школы.", options: ['из', 'с', 'от'], a: 'из' },
+    { id: 17, type: 'drag', q: "Ordne das Paar zu: На стадион &harr; ___ стадиона.", options: ['из', 'с', 'от'], a: 'с' },
+    { id: 18, type: 'drag', q: "Ordne das Paar zu: К сестре &harr; ___ сестры.", options: ['из', 'с', 'от'], a: 'от' },
+    { id: 19, type: 'select', q: "Самолёт летит ___ Москвы (aus Moskau).", options: ['из', 'с', 'от'], a: 'из' },
+    { id: 20, type: 'radio', q: "Welche Präposition nutzt man für Personen (Wohin)?", options: ['в', 'на', 'к'], a: 'к' }
+];
+
+function initExercises() {
+    const container = document.getElementById('exercise-container');
+    exercises.forEach((ex, index) => {
+        const section = document.createElement('div');
+        section.className = 'exercise-section';
+        section.innerHTML = `<span class="exercise-title">Aufgabe ${index + 1}:</span><p>${ex.q}</p>`;
+
+        if (ex.type === 'select') {
+            const select = document.createElement('select');
+            select.id = `input-${ex.id}`;
+            select.innerHTML = '<option value="">...</option>' + ex.options.map(o => `<option value="${o}">${o}</option>`).join('');
+            select.onchange = () => checkSelect(ex.id, ex.a);
+            section.appendChild(select);
+        } else if (ex.type === 'radio') {
+            const group = document.createElement('div');
+            group.className = 'radio-group';
+            ex.options.forEach(o => {
+                const label = document.createElement('label');
+                label.className = 'radio-option';
+                label.id = `label-${ex.id}-${o}`;
+                label.innerHTML = `<input type="radio" name="radio-${ex.id}" value="${o}" onchange="checkRadio(${ex.id}, '${o}', '${ex.a}')"> ${o}`;
+                group.appendChild(label);
+            });
+            section.appendChild(group);
+        } else if (ex.type === 'drag') {
+            const dragContainer = document.createElement('div');
+            dragContainer.className = 'drag-container';
+            ex.options.forEach(o => {
+                const item = document.createElement('div');
+                item.className = 'draggable';
+                item.draggable = true;
+                item.innerText = o;
+                item.ondragstart = (e) => e.dataTransfer.setData('text', o);
+                dragContainer.appendChild(item);
+            });
+            const dropZone = document.createElement('div');
+            dropZone.className = 'drop-zone';
+            dropZone.id = `drop-${ex.id}`;
+            dropZone.ondragover = (e) => e.preventDefault();
+            dropZone.ondrop = (e) => {
+                e.preventDefault();
+                const data = e.dataTransfer.getData('text');
+                checkDrag(ex.id, data, ex.a);
+            };
+            section.appendChild(dragContainer);
+            section.appendChild(dropZone);
+        }
+
+        const btns = document.createElement('div');
+        btns.className = 'btn-group';
+        btns.innerHTML = `
+            <button class="btn-reset" onclick="resetEx(${ex.id})">Zurücksetzen</button>
+            <button class="btn-solution" onclick="showSol(${ex.id}, '${ex.a}')">Lösung anzeigen</button>
+        `;
+        section.appendChild(btns);
+        container.appendChild(section);
+    });
+}
+
+function checkSelect(id, correct) {
+    const el = document.getElementById(`input-${id}`);
+    if (el.value === "") { el.className = ""; return; }
+    el.className = el.value === correct ? 'correct' : 'incorrect';
+}
+
+function checkRadio(id, val, correct) {
+    const options = exercises.find(e => e.id === id).options;
+    options.forEach(o => {
+        document.getElementById(`label-${id}-${o}`).className = 'radio-option';
+    });
+    const label = document.getElementById(`label-${id}-${val}`);
+    label.classList.add(val === correct ? 'correct' : 'incorrect');
+}
+
+function checkDrag(id, val, correct) {
+    const el = document.getElementById(`drop-${id}`);
+    el.innerText = val;
+    el.className = 'drop-zone ' + (val === correct ? 'correct' : 'incorrect');
+}
+
+function resetEx(id) {
+    const ex = exercises.find(e => e.id === id);
+    if (ex.type === 'select') {
+        const el = document.getElementById(`input-${id}`);
+        el.value = "";
+        el.className = "";
+    } else if (ex.type === 'radio') {
+        ex.options.forEach(o => {
+            const label = document.getElementById(`label-${id}-${o}`);
+            label.className = 'radio-option';
+            label.querySelector('input').checked = false;
+        });
+    } else if (ex.type === 'drag') {
+        const el = document.getElementById(`drop-${id}`);
+        el.innerText = "";
+        el.className = "drop-zone";
+    }
+}
+
+function showSol(id, correct) {
+    const ex = exercises.find(e => e.id === id);
+    if (ex.type === 'select') {
+        const el = document.getElementById(`input-${id}`);
+        el.value = correct;
+        el.className = "correct";
+    } else if (ex.type === 'radio') {
+        ex.options.forEach(o => {
+            const label = document.getElementById(`label-${id}-${o}`);
+            label.className = o === correct ? 'radio-option correct' : 'radio-option';
+            if (o === correct) label.querySelector('input').checked = true;
+        });
+    } else if (ex.type === 'drag') {
+        const el = document.getElementById(`drop-${id}`);
+        el.innerText = correct;
+        el.className = "drop-zone correct";
+    }
+}
+
+document.addEventListener('DOMContentLoaded', initExercises);
+</script>
+
+</body>
+</html>
