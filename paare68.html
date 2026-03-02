@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matching-Übung: Russische Präpositionspaare</title>
+    <!-- Polyfill für Drag & Drop auf Touch-Geräten -->
+    <script src="https://cdn.jsdelivr.net/npm/drag-drop-touch@1.3.1/DragDropTouch.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #e74c3c;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            margin: 10px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 10px;
+        }
+
+        .instruction {
+            background: #eef2f7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+            border-left: 5px solid var(--accent-color);
+        }
+
+        /* Matching Area */
+        .matching-table {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .match-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .origin-phrase {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            font-weight: 600;
+            text-align: right;
+            font-size: 1.1rem;
+        }
+
+        .origin-phrase small {
+            display: block;
+            font-weight: normal;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .drop-zone {
+            height: 50px;
+            border: 2px dashed #cbd5e0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .drop-zone.drag-over {
+            background: #e0e7ff;
+            border-color: var(--accent-color);
+        }
+
+        /* Draggable Items */
+        .draggable-pool {
+            background: #edf2f7;
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            min-height: 80px;
+            border: 1px solid #cbd5e0;
+        }
+
+        .draggable {
+            background: var(--accent-color);
+            color: white;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: grab;
+            user-select: none;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            touch-action: none;
+            font-size: 1rem;
+        }
+
+        .draggable:active {
+            cursor: grabbing;
+        }
+
+        .draggable.in-zone {
+            width: 90%;
+            text-align: center;
+            box-shadow: none;
+        }
+
+        /* Feedback Colors */
+        .correct {
+            background-color: var(--success-color) !important;
+            border-color: var(--success-color) !important;
+            color: white !important;
+        }
+
+        .incorrect {
+            background-color: var(--error-color) !important;
+            border-color: var(--error-color) !important;
+            color: white !important;
+        }
+
+        /* Buttons */
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        button:active { transform: scale(0.98); }
+
+        .btn-reset { background: #718096; color: white; }
+        .btn-solution { background: var(--accent-color); color: white; }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .match-row {
+                grid-template-columns: 1fr;
+                gap: 5px;
+                margin-bottom: 10px;
+            }
+            .origin-phrase { text-align: center; padding: 8px; }
+            .drop-zone { height: 45px; }
+            h1 { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Logik der Paare</h1>
+    
+    <div class="instruction">
+        <strong>Anleitung:</strong> Ziehe den passenden „Rückweg“ (aus/von ...) zu seinem entsprechenden „Hinweg“ (in/auf/zu ...). 
+        Achte auf die Paare: <strong>В &harr; ИЗ</strong>, <strong>НА &harr; С</strong> und <strong>К &harr; ОТ</strong>.
+    </div>
+
+    <div class="matching-table" id="matching-table">
+        <!-- Rows will be shuffled and generated here -->
+    </div>
+
+    <div class="draggable-pool" id="pool" ondrop="dropToPool(event)" ondragover="allowDrop(event)">
+        <!-- Draggables will be generated here -->
+    </div>
+
+    <div class="controls">
+        <button class="btn-reset" onclick="resetExercise()">Zurücksetzen</button>
+        <button class="btn-solution" onclick="showSolution()">Lösung anzeigen</button>
+    </div>
+</div>
+
+<script>
+    const pairs = [
+        { start: "в парк", end: "из парка", hint: "in den Park" },
+        { start: "в школу", end: "из школы", hint: "in die Schule" },
+        { start: "в магазин", end: "из магазина", hint: "ins Geschäft" },
+        { start: "на почту", end: "с почты", hint: "zur Post" },
+        { start: "на стадиon", end: "с стадиона", hint: "zum Stadion" },
+        { start: "на работу", end: "с работы", hint: "zur Arbeit" },
+        { start: "к врачу", end: "от врача", hint: "zum Arzt" },
+        { start: "к брату", end: "от брата", hint: "zum Bruder" },
+        { start: "к бабушке", end: "от бабушки", hint: "zur Oma" }
+    ];
+
+    let draggedElement = null;
+
+    function init() {
+        const table = document.getElementById('matching-table');
+        const pool = document.getElementById('pool');
+        
+        // Shuffle pairs for the left side
+        const shuffledLeft = [...pairs].sort(() => Math.random() - 0.5);
+        // Shuffle pairs for the draggables pool
+        const shuffledRight = [...pairs].sort(() => Math.random() - 0.5);
+
+        table.innerHTML = '';
+        pool.innerHTML = '';
+
+        shuffledLeft.forEach((pair, index) => {
+            const row = document.createElement('div');
+            row.className = 'match-row';
+            row.innerHTML = `
+                <div class="origin-phrase">
+                    ${pair.start}
+                    <small>(${pair.hint})</small>
+                </div>
+                <div class="drop-zone" id="zone-${index}" data-correct="${pair.end}" ondrop="dropToZone(event)" ondragover="allowDrop(event)" ondragenter="dragEnter(event)" ondragleave="dragLeave(event)"></div>
+            `;
+            table.appendChild(row);
+        });
+
+        shuffledRight.forEach((pair, index) => {
+            const dragItem = document.createElement('div');
+            dragItem.className = 'draggable';
+            dragItem.draggable = true;
+            dragItem.id = `drag-${index}`;
+            dragItem.innerText = pair.end;
+            dragItem.addEventListener('dragstart', dragStart);
+            pool.appendChild(dragItem);
+        });
+    }
+
+    function dragStart(e) {
+        draggedElement = e.target;
+        e.dataTransfer.setData('text/plain', e.target.id);
+    }
+
+    function allowDrop(e) {
+        e.preventDefault();
+    }
+
+    function dragEnter(e) {
+        if (e.target.classList.contains('drop-zone')) {
+            e.target.classList.add('drag-over');
+        }
+    }
+
+    function dragLeave(e) {
+        if (e.target.classList.contains('drop-zone')) {
+            e.target.classList.remove('drag-over');
+        }
+    }
+
+    function dropToZone(e) {
+        e.preventDefault();
+        const zone = e.target.closest('.drop-zone');
+        zone.classList.remove('drag-over');
+
+        // If zone already has an item, move it back to pool
+        if (zone.children.length > 0) {
+            document.getElementById('pool').appendChild(zone.children[0]);
+        }
+
+        const id = e.dataTransfer.getData('text/plain');
+        const el = document.getElementById(id);
+        el.classList.add('in-zone');
+        zone.appendChild(el);
+        
+        checkZone(zone);
+    }
+
+    function dropToPool(e) {
+        e.preventDefault();
+        const pool = document.getElementById('pool');
+        const id = e.dataTransfer.getData('text/plain');
+        const el = document.getElementById(id);
+        el.classList.remove('in-zone');
+        el.classList.remove('correct', 'incorrect');
+        pool.appendChild(el);
+        
+        // Re-check all zones in case an item was removed
+        document.querySelectorAll('.drop-zone').forEach(checkZone);
+    }
+
+    function checkZone(zone) {
+        if (zone.children.length === 0) {
+            zone.classList.remove('correct', 'incorrect');
+            return;
+        }
+        
+        const item = zone.children[0];
+        const isCorrect = item.innerText === zone.dataset.correct;
+        
+        item.classList.remove('correct', 'incorrect');
+        if (isCorrect) {
+            item.classList.add('correct');
+        } else {
+            item.classList.add('incorrect');
+        }
+    }
+
+    function resetExercise() {
+        init();
+    }
+
+    function showSolution() {
+        const zones = document.querySelectorAll('.drop-zone');
+        const pool = document.getElementById('pool');
+        
+        zones.forEach(zone => {
+            const correctText = zone.dataset.correct;
+            const items = document.querySelectorAll('.draggable');
+            
+            let correctItem = Array.from(items).find(it => it.innerText === correctText);
+            
+            if (correctItem) {
+                correctItem.classList.add('in-zone', 'correct');
+                correctItem.classList.remove('incorrect');
+                zone.appendChild(correctItem);
+            }
+        });
+    }
+
+    // Initialize on load
+    window.onload = init;
+</script>
+
+</body>
+</html>
