@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Satzbau-Baukasten: 12 Russische Sätze</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --success-color: #27ae60;
+            --error-color: #e74c3c;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --tile-bg: #ecf0f1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.6rem;
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .instruction {
+            background: #eef2f7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 5px solid var(--accent-color);
+            font-size: 0.95rem;
+        }
+
+        .exercise-block {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .translation {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .translation::before {
+            content: "🇩🇪";
+        }
+
+        /* Arbeitsbereich */
+        .work-area {
+            min-height: 60px;
+            border: 2px dashed #bdc3c7;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: #fdfdfd;
+            transition: all 0.3s;
+        }
+
+        .word-pool {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+
+        /* Die Wort-Kacheln */
+        .tile {
+            background: var(--tile-bg);
+            border: 1px solid #bdc3c7;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            user-select: none;
+            font-weight: bold;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            font-size: 1rem;
+        }
+
+        .tile:hover {
+            background: var(--accent-color);
+            color: white;
+            transform: translateY(-2px);
+            border-color: var(--accent-color);
+        }
+
+        .tile.selected {
+            opacity: 0.2;
+            cursor: default;
+            transform: none;
+            background: #ccc;
+        }
+
+        /* Status-Farben */
+        .work-area.correct { border-color: var(--success-color); background: #e8f5e9; }
+        .work-area.incorrect { border-color: var(--error-color); background: #ffebee; }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.1s, opacity 0.2s;
+            font-size: 0.9rem;
+        }
+
+        button:active { transform: scale(0.95); }
+
+        .btn-check { background: var(--success-color); color: white; }
+        .btn-reset { background: #95a5a6; color: white; }
+        .btn-solution { background: var(--accent-color); color: white; }
+        button:hover { opacity: 0.9; }
+
+        @media (max-width: 600px) {
+            .work-area { min-height: 80px; }
+            h1 { font-size: 1.3rem; }
+            .container { padding: 15px; }
+            .tile { padding: 6px 10px; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Satzbau-Baukasten (12 Übungen)</h1>
+    
+    <div class="instruction">
+        <strong>Anleitung:</strong> Bilde den korrekten russischen Satz passend zur deutschen Übersetzung.
+        <ol>
+            <li>Klicke auf die Wörter unten, um sie in den Satz einzufügen.</li>
+            <li>Klicke auf ein Wort im oberen Feld, um es wieder zu entfernen.</li>
+            <li>Prüfe dein Ergebnis mit dem <strong>Überprüfen</strong>-Button.</li>
+        </ol>
+    </div>
+
+    <div id="exercise-list">
+        <!-- JS generiert Aufgaben hier -->
+    </div>
+</div>
+
+<script>
+    const sentenceData = [
+        { id: 1, words: ["Он", "идёт", "из", "школы."], trans: "Er kommt aus der Schule." },
+        { id: 2, words: ["Я", "еду", "к", "врачу."], trans: "Ich fahre zum Arzt." },
+        { id: 3, words: ["Мы", "идём", "на", "почту."], trans: "Wir gehen zur Post." },
+        { id: 4, words: ["Она", "пришла", "с", "работы."], trans: "Sie kam von der Arbeit zurück." },
+        { id: 5, words: ["Письмо", "пришло", "от", "мамы."], trans: "Der Brief kam von Mama." },
+        { id: 6, words: ["Дети", "бегут", "в", "парк."], trans: "Die Kinder rennen in den Park." },
+        { id: 7, words: ["Они", "вышли", "из", "театра."], trans: "Sie sind aus dem Theater gegangen." },
+        { id: 8, words: ["Книга", "лежит", "на", "столе."], trans: "Das Buch liegt auf dem Tisch." },
+        { id: 9, words: ["Самолёт", "летит", "в", "Москву."], trans: "Das Flugzeug fliegt nach Moskau." },
+        { id: 10, words: ["Папа", "пришёл", "из", "магазина."], trans: "Papa kam aus dem Geschäft." },
+        { id: 11, words: ["Студент", "идёт", "на", "лекцию."], trans: "Der Student geht zur Vorlesung." },
+        { id: 12, words: ["Я", "иду", "от", "друга."], trans: "Ich komme (gerade) vom Freund." }
+    ];
+
+    const exerciseList = document.getElementById('exercise-list');
+    let userAnswers = {};
+
+    function shuffle(array) {
+        return [...array].sort(() => Math.random() - 0.5);
+    }
+
+    function init() {
+        exerciseList.innerHTML = '';
+        sentenceData.forEach(sentence => {
+            userAnswers[sentence.id] = [];
+            const shuffled = shuffle(sentence.words);
+
+            const block = document.createElement('div');
+            block.className = 'exercise-block';
+            block.id = `block-${sentence.id}`;
+
+            block.innerHTML = `
+                <div class="translation">${sentence.trans}</div>
+                <div class="work-area" id="work-${sentence.id}"></div>
+                <div class="word-pool" id="pool-${sentence.id}">
+                    ${shuffled.map((w, i) => `<div class="tile" onclick="addWord(${sentence.id}, '${w}', this)">${w}</div>`).join('')}
+                </div>
+                <div class="controls">
+                    <button class="btn-check" onclick="checkSentence(${sentence.id})">Überprüfen</button>
+                    <button class="btn-reset" onclick="resetSentence(${sentence.id})">Zurücksetzen</button>
+                    <button class="btn-solution" onclick="showSolution(${sentence.id})">Lösung anzeigen</button>
+                </div>
+            `;
+            exerciseList.appendChild(block);
+        });
+    }
+
+    window.addWord = function(sId, word, el) {
+        if (el.classList.contains('selected')) return;
+        
+        userAnswers[sId].push({word: word, element: el});
+        el.classList.add('selected');
+        renderWorkArea(sId);
+    };
+
+    function renderWorkArea(sId) {
+        const area = document.getElementById(`work-${sId}`);
+        area.innerHTML = '';
+        area.classList.remove('correct', 'incorrect');
+        
+        userAnswers[sId].forEach((item, index) => {
+            const tile = document.createElement('div');
+            tile.className = 'tile';
+            tile.innerText = item.word;
+            tile.onclick = () => removeWord(sId, index);
+            area.appendChild(tile);
+        });
+    }
+
+    window.removeWord = function(sId, index) {
+        const removedItem = userAnswers[sId].splice(index, 1)[0];
+        removedItem.element.classList.remove('selected');
+        renderWorkArea(sId);
+    };
+
+    window.checkSentence = function(sId) {
+        const sentence = sentenceData.find(s => s.id === sId);
+        const area = document.getElementById(`work-${sId}`);
+        const userText = userAnswers[sId].map(i => i.word).join(' ');
+        const correctText = sentence.words.join(' ');
+
+        if (userText === correctText) {
+            area.classList.add('correct');
+        } else {
+            area.classList.add('incorrect');
+            // Kurz rütteln bei Fehlern (optional)
+            area.style.transform = "translateX(5px)";
+            setTimeout(() => area.style.transform = "translateX(0)", 100);
+        }
+    };
+
+    window.resetSentence = function(sId) {
+        userAnswers[sId] = [];
+        const poolTiles = document.querySelectorAll(`#pool-${sId} .tile`);
+        poolTiles.forEach(t => t.classList.remove('selected'));
+        renderWorkArea(sId);
+    };
+
+    window.showSolution = function(sId) {
+        const sentence = sentenceData.find(s => s.id === sId);
+        const area = document.getElementById(`work-${sId}`);
+        area.innerHTML = '';
+        userAnswers[sId] = []; 
+        
+        // Alle Kacheln im Pool ausgrauen
+        document.querySelectorAll(`#pool-${sId} .tile`).forEach(t => t.classList.add('selected'));
+
+        sentence.words.forEach(w => {
+            const tile = document.createElement('div');
+            tile.className = 'tile';
+            tile.innerText = w;
+            area.appendChild(tile);
+        });
+        area.classList.add('correct');
+    };
+
+    // Initialisierung beim Laden
+    window.onload = init;
+</script>
+
+</body>
+</html>
